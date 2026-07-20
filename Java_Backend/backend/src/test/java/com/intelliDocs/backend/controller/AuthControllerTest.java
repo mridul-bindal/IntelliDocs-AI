@@ -1,55 +1,43 @@
 package com.intelliDocs.backend.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intelliDocs.backend.dto.auth.AuthResponse;
 import com.intelliDocs.backend.dto.auth.RegisterRequest;
 import com.intelliDocs.backend.entity.User;
 import com.intelliDocs.backend.repository.UserRepository;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import com.intelliDocs.backend.security.JWTService;
 
-@WebMvcTest(AuthController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private UserRepository userRepository;
-
     @Test
-    void shouldRegisterUser() throws Exception {
+    void shouldRegisterUserAndReturnToken() {
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+        JWTService jwtService = new JWTService("LssUntjoDwqFhzcS5K8X4zGiIzj5OX9K", 86400000L);
+        AuthController controller = new AuthController(userRepository, jwtService);
+
         RegisterRequest request = RegisterRequest.builder()
                 .name("Alice")
                 .email("alice@example.com")
                 .password("password123")
                 .build();
 
-        when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+        Mockito.when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(1L);
             return user;
         });
 
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("User registered successfully"));
+        ResponseEntity<AuthResponse> response = controller.register(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("User registered successfully");
+        assertThat(response.getBody().getToken()).isNotBlank();
     }
 }

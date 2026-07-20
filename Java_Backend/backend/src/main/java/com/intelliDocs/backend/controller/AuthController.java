@@ -14,6 +14,7 @@ import com.intelliDocs.backend.dto.auth.LoginRequest;
 import com.intelliDocs.backend.dto.auth.RegisterRequest;
 import com.intelliDocs.backend.entity.User;
 import com.intelliDocs.backend.repository.UserRepository;
+import com.intelliDocs.backend.security.JWTService;
 
 import jakarta.validation.Valid;
 
@@ -22,9 +23,11 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final JWTService jwtService;
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository, JWTService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -45,10 +48,13 @@ public class AuthController {
 
         User savedUser = userRepository.save(user);
 
+        String token = jwtService.generateToken(savedUser);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(AuthResponse.builder()
                         .message("User registered successfully")
                         .role(savedUser.getRole())
+                        .token(token)
                         .build());
     }
 
@@ -65,10 +71,12 @@ public class AuthController {
 
         User user = userOpt.get();
 
+        String token = jwtService.generateToken(user);
+
         return ResponseEntity.ok(AuthResponse.builder()
                 .message("Login successful")
                 .role(user.getRole())
-                .token("dummy-token")
+                .token(token)
                 .build());
     }
 }
