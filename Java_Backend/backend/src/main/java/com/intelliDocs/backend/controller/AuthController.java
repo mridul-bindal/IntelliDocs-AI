@@ -1,18 +1,21 @@
 package com.intelliDocs.backend.controller;
 
-import com.intelliDocs.backend.dto.auth.AuthResponse;
-import com.intelliDocs.backend.dto.auth.LoginRequest;
-import com.intelliDocs.backend.dto.auth.RegisterRequest;
-import com.intelliDocs.backend.entity.User;
-import com.intelliDocs.backend.repository.UserRepository;
-import jakarta.validation.Valid;
 import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.intelliDocs.backend.dto.auth.AuthResponse;
+import com.intelliDocs.backend.dto.auth.LoginRequest;
+import com.intelliDocs.backend.dto.auth.RegisterRequest;
+import com.intelliDocs.backend.entity.User;
+import com.intelliDocs.backend.repository.UserRepository;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
