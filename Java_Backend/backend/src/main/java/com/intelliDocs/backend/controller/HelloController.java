@@ -15,4 +15,9 @@ public class HelloController {
     public String health() {
         return "Backend is Healthy ✅";
     }
+
+    @GetMapping("/happy")
+    public String happy(){
+        return "Happy to see you! 😄";
+    }
 }
