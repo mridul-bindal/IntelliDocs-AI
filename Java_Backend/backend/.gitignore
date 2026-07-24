@@ -8,6 +8,7 @@ target/
 .env
 .env.*
 application-local.properties
+storage/uploads/
 
 ### STS ###
 .apt_generated
